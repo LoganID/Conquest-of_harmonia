@@ -5,7 +5,7 @@
 -- ********************************************
 
 --
--- Patrol positions in the fortress:
+-- Patrol squad positions in the fortress:
 --
 --                 █████
 --                 █   █
