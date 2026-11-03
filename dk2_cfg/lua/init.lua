@@ -7,8 +7,6 @@ function OnCampaignGameStart()
     CasinoInit()                                                -- casino code 
     RegisterTimerEvent(CheckForStunDeaths, 1, true)             -- Repeat each frame
     Game.CoopRange = 2                                          -- Coop range in subtiles
-    Game.CasinoBarrelRange = 2                                  -- Barrel range in subtiles
-    Game.CasinoTableRange = 2                                   -- Table range in subtiles
     RegisterSlabKindChangeEvent(LavaBecomesBridge, "LAVA", "BRIDGE_FRAME")
 end
 
@@ -20,6 +18,8 @@ function CheckForStunDeaths()
         end
     end
 end
+
+-- wooden bride and stone bridge behavior
 
 function LavaBecomesBridge(eventData)
 
@@ -34,6 +34,7 @@ function LavaBecomesBridge(eventData)
 
 end
 
+-- turning slabs from enemy Keepers to stone after 10 ticks
 
 function BridgeAi(eventData, triggerData)
     
@@ -42,6 +43,8 @@ function BridgeAi(eventData, triggerData)
     ChangeSlabType(slab.slb_x, slab.slb_y, "BRIDGE_STONE")
     end
 end
+
+-- functions to make the wooden bride functional
 
 function BridgeRot(eventData, triggerData)
     
@@ -62,4 +65,20 @@ function BridgeBurn(eventData, triggerData)
     CreateEffectAtPos("EFFECT_BRIDGEBURN", slab.slb_x* 3 + 1, slab.slb_y* 3 + 1, 1)
     CreateEffectAtPos("EFFECT_SPANGLE_RED", slab.slb_x* 3 + 1, slab.slb_y* 3 + 1, 1)
     end
+end
+
+-- place barricades in a random orientation
+
+-- Lists all existing barricades as tupel {barricades, isInit}: 'barricades' as thing object and 'isInit' as boolean
+Game.BarricadesToInit = {}
+
+function UpdateFunctionBARRICADE(barricade)
+    if barricade.creation_turn == PLAYER0.GAME_TURN - 1 then
+        InitializeBarricade(barricade)
+    end
+end
+
+function InitializeBarricade(barricade)
+    -- Random rotation
+    barricade.orientation = math.random(0, 7) * 256
 end
