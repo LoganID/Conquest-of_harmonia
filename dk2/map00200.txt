@@ -53,6 +53,18 @@ REM START INTRO FOR CHOOSING THE REVEAL/CONCEAL
 
 QUICK_OBJECTIVE(0,"Please choose between the boxes. Try both to see what you prefer and then continue, it will remain for the rest of the campaign.")
 
+QUICK_MESSAGE(21,"to RauelOn, Logan and Shintoras!",REAPER)
+
+QUICK_MESSAGE(22,"and Ermino for his Artwork",REAPER)
+
+QUICK_MESSAGE(23,"Special thanks goes to Qqluqq and Loobinex",REAPER)
+
+QUICK_MESSAGE(24,"Nothing would be done without you:",REAPER)
+
+QUICK_MESSAGE(25,"I wanna say thank you to each Helper!",REAPER)
+
+QUICK_MESSAGE(26,"Welcome to Conquest of Harmonia for Keeperfx.",REAPER)
+
 ADD_OBJECT_TO_LEVEL(SPECBOX_CUSTOM_A,7,1,PLAYER0)
 ADD_OBJECT_TO_LEVEL(SPECBOX_CUSTOM_B,8,2,PLAYER0)
 ADD_OBJECT_TO_LEVEL(SPECBOX_CUSTOM,9,3,PLAYER0)
@@ -225,7 +237,7 @@ ENDIF
 IF(PLAYER0,TIMER0 >= 400)
     PLAY_MESSAGE(PLAYER0,SPEECH,"lvl1spe09.ogg")
     TUTORIAL_FLASH_BUTTON(LAIR,-1)
-    QUICK_INFORMATION(3,"Welcome to Conquest of Harmonia for Keeperfx. Special thanks goes to Qqluqq and Loobinex; they made this possible. Also thanks to Erminio Lucente for his Artwork.")
+    QUICK_INFORMATION(3,"Good. Now build: click on the flashing tab to see the choice of rooms; select the symbol of the bed. Then make a Lair that’s big enough to hold as many creatures as can be attracted though your Portal - three by five will prove sufficient. Remember such construction costs you gold.")
 ENDIF
 
 IF(PLAYER0, GOBLIN >= 1)
