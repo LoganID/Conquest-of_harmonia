@@ -83,3 +83,21 @@ function InitializeBarricade(barricade)
     -- Random rotation
     barricade.orientation = math.random(0, 7) * 256
 end
+
+-- place fear traps in a south orientation when placed by player 0
+
+-- Lists all existing traps as tupel {traps, isInit}: 'traps' as thing object and 'isInit' as boolean
+Game.FearTrapsToInit = {}
+
+function UpdateFunctionFEAR_TRAP(fear_trap)
+    if fear_trap.creation_turn == PLAYER0.GAME_TURN - 1 then
+        if fear_trap.owner == PLAYER0 then
+            InitializeFEAR_TRAP(fear_trap)
+        end
+    end
+end
+
+function InitializeFEAR_TRAP(fear_trap)
+    -- Random rotation
+    fear_trap.orientation = (1536)
+end
