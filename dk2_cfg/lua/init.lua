@@ -95,6 +95,7 @@ function UpdateFunctionFEAR_TRAP(fear_trap)
             InitializeFEAR_TRAP(fear_trap)
         end
     end
+    return 1
 end
 
 function InitializeFEAR_TRAP(fear_trap)
