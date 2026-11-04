@@ -126,12 +126,8 @@ function SpawnPatrols()
 	local Route12 = {}
 			Route12[1] = { stl_x = 157, stl_y = 180 }
 			Route12[2] = { stl_x = 157, stl_y = 181 }
-	local Route13 = {}
-			Route13[1] = { stl_x = 108, stl_y = 147 }
-			Route13[2] = { stl_x = 108, stl_y = 149 }
-	local Route14 = {}
-			Route14[1] = { stl_x = 108, stl_y = 159 }
-			Route14[2] = { stl_x = 108, stl_y = 161 }
+	local Pos13 = { stl_x = 109, stl_y = 148 }
+	local Pos14 = { stl_x = 109, stl_y = 160 }
 
 	local PatrolPartySquad1 = AddPartyToLevel(PLAYER_GOOD,"SQUAD1", {stl_x = 118, stl_y = 143})
 	local PatrolPartySquad2 = AddPartyToLevel(PLAYER_GOOD,"SQUAD2", {stl_x = 118, stl_y = 164})
@@ -145,8 +141,8 @@ function SpawnPatrols()
 	local PatrolPartySquad10 = AddPartyToLevel(PLAYER_GOOD,"SQUAD10", {stl_x = 157, stl_y = 168})
 	local PatrolPartySquad11 = AddPartyToLevel(PLAYER_GOOD,"SQUAD11", {stl_x = 169, stl_y = 169})
 	local PatrolPartySquad12 = AddPartyToLevel(PLAYER_GOOD,"SQUAD12", {stl_x = 157, stl_y = 180})
-	local PatrolPartyGuard1 = AddPartyToLevel(PLAYER_GOOD,"GUARD1", {stl_x = 108, stl_y = 147})
-	local PatrolPartyGuard2 = AddPartyToLevel(PLAYER_GOOD,"GUARD2", {stl_x = 108, stl_y = 159})
+	local Guard1 = AddPartyToLevel(PLAYER_GOOD,"GUARD1", {stl_x = 109, stl_y = 148})
+	local Guard2 = AddPartyToLevel(PLAYER_GOOD,"GUARD2", {stl_x = 109, stl_y = 160})
 
 	RegisterPatrol(PatrolPartySquad1[1], Route1, 1, "Squad1 Patrol")
 	RegisterPatrol(PatrolPartySquad2[1], Route2, 1, "Squad2 Patrol")
@@ -160,7 +156,7 @@ function SpawnPatrols()
 	RegisterPatrol(PatrolPartySquad10[1], Route10, 1, "Squad10 Patrol")
 	RegisterPatrol(PatrolPartySquad11[1], Route11, 1, "Squad11 Patrol")
 	RegisterPatrol(PatrolPartySquad12[1], Route12, 1, "Squad12 Patrol")
-	RegisterPatrol(PatrolPartyGuard1[1], Route13, 1, "Guard1 Patrol")
-	RegisterPatrol(PatrolPartyGuard2[1], Route14, 1, "Guard2 Patrol")
+	RegisterGuard(Guard1[1], Pos13, 1500, "Guard 1", true, true, false)
+	RegisterGuard(Guard2[1], Pos14, 1500, "Guard 2", true, true, false)
 end
 

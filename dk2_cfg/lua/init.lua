@@ -1,5 +1,6 @@
 require "hatchery"
 require "patrols"
+require "guards"
 require "helper"
 require "casino"
 
