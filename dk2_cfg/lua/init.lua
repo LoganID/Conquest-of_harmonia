@@ -8,6 +8,7 @@ function OnCampaignGameStart()
     CasinoInit()                                                -- casino code 
     RegisterTimerEvent(CheckForStunDeaths, 1, true)             -- Repeat each frame
     Game.CoopRange = 2                                          -- Coop range in subtiles
+    Game.CasinoTableRange = 2                                   -- Table range in subtiles
     RegisterSlabKindChangeEvent(LavaBecomesBridge, "LAVA", "BRIDGE_FRAME")
 end
 
@@ -102,3 +103,29 @@ function InitializeFEAR_TRAP(fear_trap)
     -- Random rotation
     fear_trap.orientation = (1536)
 end
+
+
+-- moving the objects in the Room
+-- Lists all existing Casino objects as tupel {Casino_Table, isInit}: 'Casino_Table' as thing object and 'isInit' as boolean
+
+Game.Casino_TableToInit = {}
+
+function UpdateFunctionTABLE(Casino_Table)
+    if Casino_Table.creation_turn == PLAYER0.GAME_TURN - 1 then
+        InitializeCasino_Table(Casino_Table)
+    end
+end
+
+function InitializeCasino_Table(Casino_Table)
+    -- Remove if not in pattern
+    if CheckForRemovalTable(Casino_Table) then
+        Casino_Table:delete()
+        return
+    end
+end
+
+function CheckForRemovalTable(Casino_Table)
+    -- Checkerboard pattern
+    return (Casino_Table.pos.slb_x + Casino_Table.pos.slb_y) % 2 == 0
+end
+
