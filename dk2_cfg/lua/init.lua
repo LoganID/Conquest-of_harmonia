@@ -78,6 +78,7 @@ function UpdateFunctionBARRICADE(barricade)
     if barricade.creation_turn == PLAYER0.GAME_TURN - 1 then
         InitializeBarricade(barricade)
     end
+    return 1
 end
 
 function InitializeBarricade(barricade)
