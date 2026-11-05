@@ -213,7 +213,7 @@ IF(PLAYER_GOOD, KNIGHT == 0)
 	QUICK_OBJECTIVE(49,"I see with satisfaction the slaughtered beast that once was called Lord Ironhelm. Sad? For him maybe, but yours is not to pity. His path was sickly righteous, its disposal served our needs. And you must bask in reputation well deserved - pure evil are your deeds.")
 	PLAY_MESSAGE(PLAYER0,SPEECH,"lvl6spe08.ogg")
   	ADD_OBJECT_TO_LEVEL(FAKE_GEM,LAST_DEATH_EVENT[PLAYER_GOOD],1,PLAYER5)
- 	COMPUTER_PLAYER(PLAYER5,0)
+ 	COMPUTER_PLAYER(PLAYER5,ROAMING)
  	SET_TIMER(PLAYER6,TIMER6)
 	REVEAL_MAP_LOCATION(PLAYER0,PLAYER_GOOD,-1)
 ENDIF

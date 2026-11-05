@@ -478,7 +478,7 @@ IF(PLAYER_GOOD, KNIGHT == 0)
     PLAY_MESSAGE(PLAYER0,SPEECH,"lvl17spe06.ogg")
     QUICK_OBJECTIVE(115,"Dark Angels answer only to the Hierarchs of Hell. 'Tis purely for their higher purpose that they side with you, so careful in their treatment - do not anger them, unless you wish them turn on you, with grave and horrid consequence.")
     ADD_OBJECT_TO_LEVEL(FAKE_GEM,LAST_DEATH_EVENT[PLAYER_GOOD],1,PLAYER5)
-    COMPUTER_PLAYER(PLAYER5,0)
+    COMPUTER_PLAYER(PLAYER5,ROAMING)
     SET_TIMER(PLAYER6,TIMER6) 
     WIN_GAME
   ENDIF

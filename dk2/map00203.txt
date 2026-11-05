@@ -309,7 +309,7 @@ IF(PLAYER_GOOD, KNIGHT == 0)
 	QUICK_INFORMATION(37,"Your deeds impress me, Keeper - your new found skills are suitably employed. But mark, you'll need both brain and brawn to overcome your foe, so keep your wits about you well and victory will be yours..")
 	WIN_GAME
     ADD_OBJECT_TO_LEVEL(FAKE_GEM,LAST_DEATH_EVENT[PLAYER_GOOD],1,PLAYER5)
-    COMPUTER_PLAYER(PLAYER5,0)
+    COMPUTER_PLAYER(PLAYER5,ROAMING)
     SET_TIMER(PLAYER6,TIMER6)
 	REVEAL_MAP_LOCATION(PLAYER0,PLAYER_GOOD,-1)
 ENDIF

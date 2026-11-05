@@ -383,12 +383,12 @@ REM WIN CONDITION
 
 IF(PLAYER0, FLAG0 == 2)
 	IF(PLAYER_GOOD, KNIGHT == 0)
-				PLAY_MESSAGE(PLAYER0,SPEECH,"lvl9spe07.ogg")
-				QUICK_OBJECTIVE(68,"The Knight is slain, he could keep neither head nor Gem, a glorious and unholy setback to the King. An evil deed well done!")
-				WIN_GAME
-  	 			ADD_OBJECT_TO_LEVEL(FAKE_GEM,LAST_DEATH_EVENT[PLAYER_GOOD],1,PLAYER5)
- 				COMPUTER_PLAYER(PLAYER5,0)
- 				SET_TIMER(PLAYER6,TIMER6)
+		PLAY_MESSAGE(PLAYER0,SPEECH,"lvl9spe07.ogg")
+		QUICK_OBJECTIVE(68,"The Knight is slain, he could keep neither head nor Gem, a glorious and unholy setback to the King. An evil deed well done!")
+		WIN_GAME
+  	 	ADD_OBJECT_TO_LEVEL(FAKE_GEM,LAST_DEATH_EVENT[PLAYER_GOOD],1,PLAYER5)
+ 		COMPUTER_PLAYER(PLAYER5,ROAMING)
+ 		SET_TIMER(PLAYER6,TIMER6)
 	ENDIF
 ENDIF
 

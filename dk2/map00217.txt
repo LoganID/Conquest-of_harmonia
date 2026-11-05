@@ -470,7 +470,7 @@ IF(PLAYER1, DUNGEON_DESTROYED == 1)
    			QUICK_OBJECTIVE(126,"A most wise strategy, the Don is dead, and now his sons will bicker amongst themselves, thence bicker will turn into fight, and fight will lead to death or ruin.  I say leave them to their fate, for yours the precious Portal Gem already claimed.")
 			WIN_GAME
 			ADD_OBJECT_TO_LEVEL(FAKE_GEM,1,1,PLAYER5)
-  			COMPUTER_PLAYER(PLAYER5,0)
+  			COMPUTER_PLAYER(PLAYER5,ROAMING)
   			SET_TIMER(PLAYER6,TIMER6) 
 		ENDIF
 	ENDIF
