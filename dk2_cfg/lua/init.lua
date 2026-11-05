@@ -128,4 +128,3 @@ function CheckForRemovalTable(Casino_Table)
     -- Checkerboard pattern
     return (Casino_Table.pos.slb_x + Casino_Table.pos.slb_y) % 2 == 0
 end
-
