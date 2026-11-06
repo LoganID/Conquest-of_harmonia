@@ -1,5 +1,5 @@
 [common]
-ThingsCount = 623
+ThingsCount = 637
 
 [thing0]
 ThingType = "Door"
@@ -7417,39 +7417,6 @@ SubtileZ = [1, 0]
 ThingType = "Trap"
 SubtypeStringID = "FEAR_TRAP"
 Subtype = 1010
-Ownership = 4
-Index = 76
-Orientation = 0
-SubtileX = [133, 128]
-SubtileY = [241, 128]
-SubtileZ = [1, 0]
-
-[thing615]
-ThingType = "Trap"
-SubtypeStringID = "FEAR_TRAP"
-Subtype = 1010
-Ownership = 4
-Index = 77
-Orientation = 0
-SubtileX = [136, 128]
-SubtileY = [241, 128]
-SubtileZ = [1, 0]
-
-[thing616]
-ThingType = "Trap"
-SubtypeStringID = "FEAR_TRAP"
-Subtype = 1010
-Ownership = 4
-Index = 78
-Orientation = 0
-SubtileX = [139, 128]
-SubtileY = [241, 128]
-SubtileZ = [1, 0]
-
-[thing617]
-ThingType = "Trap"
-SubtypeStringID = "FEAR_TRAP"
-Subtype = 1010
 Ownership = 0
 Index = 79
 Orientation = 0
@@ -7457,7 +7424,7 @@ SubtileX = [139, 128]
 SubtileY = [235, 128]
 SubtileZ = [1, 0]
 
-[thing618]
+[thing615]
 ThingType = "Trap"
 SubtypeStringID = "FEAR_TRAP"
 Subtype = 1010
@@ -7468,7 +7435,7 @@ SubtileX = [136, 128]
 SubtileY = [235, 128]
 SubtileZ = [1, 0]
 
-[thing619]
+[thing616]
 ThingType = "Trap"
 SubtypeStringID = "BARRICADE_TRAP_EVIL"
 Subtype = 1001
@@ -7479,7 +7446,7 @@ SubtileX = [148, 128]
 SubtileY = [226, 128]
 SubtileZ = [1, 0]
 
-[thing620]
+[thing617]
 ThingType = "Trap"
 SubtypeStringID = "BARRICADE_TRAP_EVIL"
 Subtype = 1001
@@ -7490,7 +7457,7 @@ SubtileX = [148, 128]
 SubtileY = [223, 128]
 SubtileZ = [1, 0]
 
-[thing621]
+[thing618]
 ThingType = "Trap"
 SubtypeStringID = "BARRICADE_TRAP_EVIL"
 Subtype = 1001
@@ -7501,7 +7468,7 @@ SubtileX = [148, 128]
 SubtileY = [220, 128]
 SubtileZ = [1, 0]
 
-[thing622]
+[thing619]
 ThingType = "Trap"
 SubtypeStringID = "BARRICADE_TRAP_EVIL"
 Subtype = 1001
@@ -7510,4 +7477,191 @@ Index = 104
 Orientation = 0
 SubtileX = [148, 128]
 SubtileY = [217, 128]
+SubtileZ = [1, 0]
+
+[thing620]
+ThingType = "Trap"
+SubtypeStringID = "POISON_GAS"
+Subtype = 3
+Ownership = 0
+Index = 85
+Orientation = 0
+SubtileX = [130, 128]
+SubtileY = [235, 128]
+SubtileZ = [1, 0]
+
+[thing621]
+ThingType = "Trap"
+SubtypeStringID = "POISON_GAS"
+Subtype = 3
+Ownership = 0
+Index = 96
+Orientation = 0
+SubtileX = [133, 128]
+SubtileY = [235, 128]
+SubtileZ = [1, 0]
+
+[thing622]
+ThingType = "Trap"
+SubtypeStringID = "WORD_OF_POWER"
+Subtype = 5
+Ownership = 0
+Index = 97
+Orientation = 0
+SubtileX = [133, 128]
+SubtileY = [232, 128]
+SubtileZ = [1, 0]
+
+[thing623]
+ThingType = "Trap"
+SubtypeStringID = "WORD_OF_POWER"
+Subtype = 5
+Ownership = 0
+Index = 98
+Orientation = 0
+SubtileX = [136, 128]
+SubtileY = [232, 128]
+SubtileZ = [1, 0]
+
+[thing624]
+ThingType = "Trap"
+SubtypeStringID = "EVIL_SENTRY"
+Subtype = 1037
+Ownership = 0
+Index = 107
+Orientation = 0
+SubtileX = [139, 128]
+SubtileY = [232, 128]
+SubtileZ = [1, 0]
+
+[thing625]
+ThingType = "Trap"
+SubtypeStringID = "EVIL_SENTRY"
+Subtype = 1037
+Ownership = 0
+Index = 108
+Orientation = 0
+SubtileX = [142, 128]
+SubtileY = [232, 128]
+SubtileZ = [1, 0]
+
+[thing626]
+ThingType = "Trap"
+SubtypeStringID = "HERO_SENTRY"
+Subtype = 1036
+Ownership = 0
+Index = 109
+Orientation = 0
+SubtileX = [145, 128]
+SubtileY = [232, 128]
+SubtileZ = [1, 0]
+
+[thing627]
+ThingType = "Trap"
+SubtypeStringID = "HERO_SENTRY"
+Subtype = 1036
+Ownership = 0
+Index = 110
+Orientation = 0
+SubtileX = [148, 128]
+SubtileY = [232, 128]
+SubtileZ = [1, 0]
+
+[thing628]
+ThingType = "Trap"
+SubtypeStringID = "BARRICADE_TRAP_EVIL"
+Subtype = 1001
+Ownership = 0
+Index = 111
+Orientation = 0
+SubtileX = [133, 128]
+SubtileY = [238, 128]
+SubtileZ = [1, 0]
+
+[thing629]
+ThingType = "Trap"
+SubtypeStringID = "BARRICADE_TRAP_EVIL"
+Subtype = 1001
+Ownership = 0
+Index = 112
+Orientation = 0
+SubtileX = [136, 128]
+SubtileY = [238, 128]
+SubtileZ = [1, 0]
+
+[thing630]
+ThingType = "Trap"
+SubtypeStringID = "BARRICADE_TRAP_EVIL"
+Subtype = 1001
+Ownership = 0
+Index = 113
+Orientation = 0
+SubtileX = [139, 128]
+SubtileY = [238, 128]
+SubtileZ = [1, 0]
+
+[thing631]
+ThingType = "Trap"
+SubtypeStringID = "BARRICADE_TRAP_HERO"
+Subtype = 1002
+Ownership = 0
+Index = 114
+Orientation = 0
+SubtileX = [142, 128]
+SubtileY = [238, 128]
+SubtileZ = [1, 0]
+
+[thing632]
+ThingType = "Trap"
+SubtypeStringID = "BARRICADE_TRAP_HERO"
+Subtype = 1002
+Ownership = 0
+Index = 115
+Orientation = 0
+SubtileX = [145, 128]
+SubtileY = [238, 128]
+SubtileZ = [1, 0]
+
+[thing633]
+ThingType = "Trap"
+SubtypeStringID = "BARRICADE_TRAP_HERO"
+Subtype = 1002
+Ownership = 0
+Index = 117
+Orientation = 0
+SubtileX = [148, 128]
+SubtileY = [238, 128]
+SubtileZ = [1, 0]
+
+[thing634]
+ThingType = "Trap"
+SubtypeStringID = "SPIKETRAP"
+Subtype = 1005
+Ownership = 0
+Index = 116
+Orientation = 0
+SubtileX = [142, 128]
+SubtileY = [235, 128]
+SubtileZ = [1, 0]
+
+[thing635]
+ThingType = "Trap"
+SubtypeStringID = "SPIKETRAP"
+Subtype = 1005
+Ownership = 0
+Index = 118
+Orientation = 0
+SubtileX = [145, 128]
+SubtileY = [235, 128]
+SubtileZ = [1, 0]
+
+[thing636]
+ThingType = "Trap"
+SubtypeStringID = "SPIKETRAP"
+Subtype = 1005
+Ownership = 0
+Index = 119
+Orientation = 0
+SubtileX = [148, 128]
+SubtileY = [235, 128]
 SubtileZ = [1, 0]
