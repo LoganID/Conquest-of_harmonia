@@ -125,6 +125,9 @@ function GuardsUpdateOne(guard)
 
                 leader.state = "CreatureDoingNothing"
                 leader.continue_state = "CreatureDoingNothing"
+                -- Set the animation on entering the guard stance. Reapplying it
+                -- every timer tick would restart the animation from its first frame.
+                leader.anim_sprite = guard.guard_anim
                 guard.facing_locked = true
 
                 if guard.random_turn then
@@ -265,11 +268,12 @@ end
 ---@param guardPosition table {stl_x = integer, stl_y = integer}
 ---@param guardOrientation integer facing angle, range 0-2047
 ---@param guard_name? string optional name for the guard
----@param perfectPositioning? boolean true = exact; false = 50/50 exact or nearby per return; omitted = true
----@param fixedTurnDirection? boolean true = use guardOrientation; false = random angle per return; omitted = true
----@param randomTurn? boolean true = change facing randomly every 1-5 seconds while guarding
-function RegisterGuard(leader, guardPosition, guardOrientation, guard_name, perfectPositioning, fixedTurnDirection, randomTurn)
+---@param options? table configuration: guard_anim, fixed_spot, lock_facing, look_around
+---@return table guard state
+function RegisterGuard(leader, guardPosition, guardOrientation, guard_name, options)
     GuardsStartTimer()
+
+    options = options or {}
 
     if guard_name == nil then
         guard_name = "Guard " .. tostring(#Game.guards + 1)
@@ -277,15 +281,17 @@ function RegisterGuard(leader, guardPosition, guardOrientation, guard_name, perf
 
     local guardIndex = #Game.guards + 1
     local party = leader.party or { leader }
+    local guardAnimation = string.upper(tostring(options.guard_anim or "STAND"))
 
     local guard = {
         leader = leader,
         position = guardPosition,
         orientation = guardOrientation,
         original_speed = leader.max_speed,
-        perfect_positioning = perfectPositioning ~= false,
-        fixed_turn_direction = fixedTurnDirection ~= false,
-        random_turn = randomTurn == true,
+        perfect_positioning = options.fixed_spot == true,
+        fixed_turn_direction = options.lock_facing == true,
+        random_turn = options.look_around == true,
+        guard_anim = guardAnimation,
         visit_perfect_positioning = nil,
         visit_orientation = nil,
         random_turn_countdown = nil,
