@@ -42,7 +42,8 @@ function SpawnPatrols()
 end
 
 function SpawnGuards()
-    local Guard1 = AddPartyToLevel(PLAYER_GOOD,"GUARD1", {stl_x = 82, stl_y = 58})
-    local Pos1 = { stl_x = 82, stl_y = 58 }
-    RegisterGuard(Guard1[1], Pos1, 1040, "Guard 1", true, true, false)
+    local Guard1 = AddPartyToLevel(PLAYER_GOOD,"GUARD1", {stl_x = 82, stl_y = 57})
+    local Pos1 = { stl_x = 82, stl_y = 57 }
+    Guard1[1].health = 10
+    RegisterGuard(Guard1[1], Pos1, 2040, "Guard 1", true, true, false)
 end
