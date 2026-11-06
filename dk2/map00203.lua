@@ -20,6 +20,9 @@ function MyHeroParties()
         AddToParty("RED", "BARBARIAN"   , 2, 500, "ATTACK_DUNGEON_HEART", 0)
         AddToParty("RED", "KNIGHT"        , 3, 0, "ATTACK_DUNGEON_HEART", 0)
 
+    CreateParty("GUARD1")
+        AddToParty("GUARD1", "DWARFA", 1, 0, "ATTACK_DUNGEON_HEART", 0)
+
 end
 
 -- Function to define routes, spawn patrolling heroes and initialize their patrolling
@@ -36,4 +39,10 @@ function SpawnPatrols()
 
     -- Calling Library function to activate patrols
     RegisterPatrol(PatrolPartyRed[1]    , northernroute , 1, "Red Patrol")
+end
+
+function SpawnGuards()
+    local Guard1 = AddPartyToLevel(PLAYER_GOOD,"GUARD1", {stl_x = 82, stl_y = 58})
+    local Pos1 = { stl_x = 82, stl_y = 58 }
+    RegisterGuard(Guard1[1], Pos1, 1040, "Guard 1", true, true, false)
 end
