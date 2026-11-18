@@ -113,16 +113,19 @@ Game.Casino_TableToInit = {}
 
 function UpdateFunctionTABLE(Casino_Table)
     if Casino_Table.creation_turn == PLAYER0.GAME_TURN - 1 then
-        InitializeCasino_Table(Casino_Table)
+        -- -1 tells the engine the table was deleted, so it stops processing it
+        return InitializeCasino_Table(Casino_Table)
     end
+    return 0
 end
 
 function InitializeCasino_Table(Casino_Table)
     -- Remove if not in pattern
     if CheckForRemovalTable(Casino_Table) then
         Casino_Table:delete()
-        return
+        return -1
     end
+    return 0
 end
 
 function CheckForRemovalTable(Casino_Table)

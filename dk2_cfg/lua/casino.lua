@@ -25,6 +25,9 @@
 --     HAPPY  - creatures usually win  -> keeper pays, creatures cheer up
 --     PROFIT - creatures usually lose -> keeper earns, creatures get annoyed
 --   Rarely a round hits the jackpot: gold piles drop and everyone celebrates.
+--   Each game is played at one of the room's roulette tables: the creature walks
+--   up to it and faces it, bets - which sets the wheel spinning - and hops about
+--   while it turns. The result, and the cheering or moaning, comes when it stops.
 --
 --   Winnings stop at the creature's GoldHold. The engine would not enforce that
 --   by itself - gold_carried is an int32 that nothing trims, and GoldHold only
@@ -46,9 +49,9 @@
 --   out and is not recruited again until something else calms it down.
 --
 -- Why some things look roundabout
---   * There is no OnDrop event in the engine, so a creature is flagged while it
---     is in the hand and the landing is resolved on the next tick. Reacting to
---     mere presence in the room instead would also grab passers-by.
+--   * A creature dropped into the casino is seated only once it has landed and
+--     the engine has decided what it does - see CasinoTakeDroppedCreature.
+--     Reacting to mere presence in the room instead would also grab passers-by.
 --   * Room capacity is counted here, not by the engine: add_creature_to_work_room()
 --     is only ever called from hardcoded C states, so a creature in a custom
 --     state is never counted. The result is handed to the engine through the
@@ -67,7 +70,7 @@ CASINO_TICK              = 20    -- main tick period, 1 Hz
 CASINO_RECRUIT_EVERY     = 3     -- run the creature sweep only every Nth tick
 CASINO_DEEP_EVERY        = 30    -- full object sweep only every Nth tick
 CASINO_START_DELAY       = 0   -- 0s: nothing happens before this game turn
-CASINO_ROUND_TICKS       = 120   -- ~6s per gambling round
+CASINO_ROUND_TICKS       = 40    -- ~2s at the table between two games; each game adds CASINO_SPIN_TICKS
 
 CASINO_STAKE_MIN         = 20
 CASINO_STAKE_MAX         = 60 
@@ -102,6 +105,41 @@ CASINO_MSG_SLOT          = 200
 CASINO_EMOTE_CHANCE      = 25    -- % chance of an emote on a normal round
 CASINO_EMOTE_TICKS       = 50    -- ~2.5s of cheering or moaning when it happens
 CASINO_DANCE_TICKS       = 100   -- ~5s of cheering for everyone on a jackpot
+
+-- Roulette tables. They are decoration the room's slab graphics put on its inner
+-- slabs, and they only turn while somebody plays (AnimationSpeed 0 in objects.cfg).
+CASINO_TABLE_MODEL       = "CASINO_ROULETTE_TABLE"
+CASINO_SPIN_TICKS        = 80    -- ~4s the wheel spins for one game
+CASINO_SPIN_SPEED        = 90    -- animation speed of a spinning wheel
+CASINO_SWITCH_TABLE      = 30    -- % chance to move on to another table after a game
+CASINO_HOP_CHANCE        = 6     -- % per turn that a creature waiting on the wheel hops
+CASINO_HOP_GAP           = 16    -- turns at least between two hops, so it lands in between
+CASINO_HOP_MIN           = 40    -- upward push of a hop - the engine's own range for
+CASINO_HOP_MAX           = 120   --   creatures that wait to join a fight
+
+-- Decoration the lever takes the place of on its slab.
+CASINO_LEVER_REPLACES = { CASINO_BARREL = true, CASINO_ROULETTE_TABLE = true }
+
+CASINO_SEATS_PER_TABLE   = 4     -- capacity of a casino: this many creatures per roulette table
+
+-- The visible lever. The two special boxes that take the click are invisible
+-- (MaximumSize 0 in objects.cfg); what the player sees is a pole decoration on
+-- the same spot. Its knob sits on the smiley in HAPPY mode (frame 15 of the
+-- lever art) and on the $ in PROFIT mode (frame 1). Flipping it plays one of the
+-- two switch animations: SWITCH_PROFIT runs 1 -> 15 and so ends on HAPPY,
+-- SWITCH_HAPPY runs 15 -> 1 and ends on PROFIT.
+CASINO_POLE_IDLE = "CASINO_POLE_IDLE"
+CASINO_POLE_LOOK = {
+    HAPPY  = { sprite = "CASINO_LEVER_HAPPY",  switch = "CASINO_POLE_MOVE_PROFIT" },
+    PROFIT = { sprite = "CASINO_LEVER_PROFIT", switch = "CASINO_POLE_MOVE_HAPPY"  },
+}
+CASINO_POLE_MODELS = {
+    CASINO_POLE_IDLE = true, CASINO_POLE_MOVE_PROFIT = true, CASINO_POLE_MOVE_HAPPY = true,
+}
+-- Length of a switch animation: 15 frames at AnimationSpeed 130 is 15 * 256 / 130,
+-- just under 30 turns. The idle pole takes over a turn or two early, so the
+-- animation never gets to wrap back to its first frame.
+CASINO_POLE_SWITCH_TICKS = 22
 CASINO_LEAVE_COOLDOWN    = 600   -- ~30s before a creature may play again
 CASINO_RESERVE_TIMEOUT   = 600   -- ~30s, release a stuck walk reservation
 CASINO_MAX_DISTANCE      = 120   -- subtiles (~40 slabs) a creature will walk to gamble
@@ -132,29 +170,36 @@ CASINO_LEVER_MODEL = {
 CASINO_ATTITUDE = {
     ROGUE        = "LIKE", TROLL         = "LIKE", BILE_DEMON   = "LIKE", SKELETON              = "HATE",
     WARLOCK      = "HATE", VAMPIRE       = "HATE", THIEF        = "LIKE", SALAMANDER            = "LIKE",
-    GOBLIN       = "LIKE", DARK_ELF      = "LIKE", FIREFFLY     = "LIKE", BLACK_KNIGHT          = "LIKE", 
+    GOBLIN       = "LIKE", DARK_ELF      = "LIKE", FIREFLY     = "LIKE", BLACK_KNIGHT          = "LIKE", 
     DWARFA       = "LIKE", SAMURAI       = "LIKE", BARBARIAN    = "LIKE", MONK                  = "HATE", 
     ARCHER       = "LIKE", WIZARD        = "LIKE", FAIRY        = "LIKE", GIANT                 = "LIKE", 
 }
 
 -- A creature never carries more than its model's GoldHold out of the casino.
--- Lua has no getter for creature config, so the values are mirrored here from
--- creatrs/*.cfg (GoldHold). Re-extract if you rebalance those files:
---   for f in creatrs/*.cfg; do ... grep -m1 '^GoldHold' ...; done
+-- Lua has no getter for creature config, so the values are mirrored here: from
+-- dk2_crtr/*.cfg where this campaign overrides a creature, from the base game's
+-- creatrs/*.cfg otherwise. Re-extract whenever GoldHold is rebalanced - a value
+-- that is too low here means the creature can lose gold but never win any back.
 CASINO_GOLD_HOLD_DEFAULT = 500
 CASINO_GOLD_HOLD = {
-    ARCHER          = 250,   AVATAR           = 1000, BARBARIAN    = 1500,
-    BILE_DEMON      = 3000,  ROGUE            = 75,   BLACK_KNIGHT = 2000,
-    DARK_MISTRESS   = 750,   ANGEL            = 250,  WARLOCK      = 1500,
-    GOBLIN          = 1000,  DWARFA           = 500,  FAIRY        = 500,
-    FLOATING_SPIRIT = 0,     FIREFLY          = 50,   GHOST        = 1000,
-    GIANT           = 2000,  REAPER           = 2500,
-    IMP             = 500,   KNIGHT           = 600,  MAIDEN       = 800,
-    MONK            = 750,   SAMURAI          = 750,
-    SKELETON        = 500,   SORCEROR         = 400,
-    SALAMANDER      = 1250,  THIEF            = 1750,
-    DARK_ELF        = 500,   TROLL            = 500,  TUNNELLER    = 1500,
-    VAMPIRE         = 2500,  WITCH            = 400,  WIZARD       = 500,
+    ANGEL             = 4000,   ARCHER            = 250,    AVATAR            = 1000,
+    BALDER            = 600,    BARBARIAN         = 1500,   BILE_DEMON        = 3000,
+    BLACK_KNIGHT      = 1500,   BUG               = 300,    DARK_ELF          = 250,
+    DARK_MISTRESS     = 750,    DEMONSPAWN        = 250,    DRAGON            = 5000,
+    DRUID             = 260,    DWARFA            = 500,    DWARFABONUS       = 500,
+    EASTER_CHICKEN    = 400,    EVILLORD          = 0,      FAIRY             = 250,
+    FAKELORD          = 600,    FELIX             = 600,    FIREFLY           = 75,
+    FLOATING_SPIRIT   = 0,      FLY               = 50,     GEMSTONE_KNIGHT   = 50000,
+    GHOST             = 1000,   GIANT             = 1000,   GOBLIN            = 500,
+    HELL_HOUND        = 500,    HORNY             = 2500,   IMP               = 1250,
+    KNIGHT            = 600,    MAIDEN            = 800,    MISTRESS          = 750,
+    MONK              = 750,    ORC               = 600,    REAPER            = 1000,
+    ROGUE             = 4000,   SALAMANDER        = 500,    SAMURAI           = 750,
+    SKELETON          = 500,    SORCEROR          = 400,    SORCERORBONUS     = 400,
+    SPIDER            = 250,    SUMMONED_SKELETON = 500,    TENTACLE          = 500,
+    THIEF             = 1750,   TIME_MAGE         = 500,    TRISTAN           = 600,
+    TROLL             = 500,    TUNNELLER         = 1500,   VAMPIRE           = 2500,
+    WARLOCK           = 400,    WITCH             = 400,    WIZARD            = 500,
 }
 
 -- How angry is too angry to gamble, as a multiple of the model's AnnoyLevel.
@@ -164,14 +209,12 @@ CASINO_GOLD_HOLD = {
 -- creature panel ever shows - 3x is a number nothing displays.
 CASINO_ANGER_LIMIT = 2
 
--- Anger threshold per model, mirrored from AnnoyLevel in creatrs/*.cfg for the
--- same reason as GoldHold. Only three values exist in the whole game: 4000 for
--- almost everything, 8000 for BIRD and FLY, and 0 for IMP and FLOATING_SPIRIT,
--- which can never get angry at all 
+-- Anger threshold per model, mirrored from AnnoyLevel for the same reason as
+-- GoldHold. 4000 for almost everything, so only the exceptions are listed; 0
+-- means the model can never get angry at all.
 CASINO_ANNOY_LEVEL_DEFAULT = 4000
 CASINO_ANNOY_LEVEL = {
-    BIRD = 8000, FLY = 8000,
-    IMP = 0, FLOATING_SPIRIT = 0,
+    EVILLORD = 0, FIREFLY = 7500, FLOATING_SPIRIT = 0, FLY = 8000, HORNY = 0, IMP = 0,
 }
 
 -- How eagerly a LIKE creature abandons its work for the casino.
@@ -215,11 +258,12 @@ Game.CASINO_MODE     = Game.CASINO_MODE     or {}  -- room_idx -> "HAPPY"|"PROFI
 Game.CASINO_SEAT     = Game.CASINO_SEAT     or {}  -- idx -> { room_idx, next_round, moving, bought_in }
 Game.CASINO_GOING    = Game.CASINO_GOING    or {}  -- idx -> { room_idx, stl_x, stl_y, reserved_at }
 Game.CASINO_COOLDOWN = Game.CASINO_COOLDOWN or {}  -- idx -> turn when play is allowed again
-Game.CASINO_HELD     = Game.CASINO_HELD     or {}  -- idx -> true while carried in the hand
 Game.CASINO_IDLE_SINCE = Game.CASINO_IDLE_SINCE or {}  -- idx -> turn the creature went idle
 Game.CASINO_LEVERS   = Game.CASINO_LEVERS   or {}  -- thing idx -> true, every lever we spawned
 Game.CASINO_TICKS    = Game.CASINO_TICKS    or 0   -- tick counter, drives the throttles
 Game.CASINO_SHUT     = Game.CASINO_SHUT     or {}  -- playerId -> turn the house reopens
+Game.CASINO_SPIN     = Game.CASINO_SPIN     or {}  -- table thing idx -> turn its wheel stops
+Game.CASINO_POLE_UNTIL = Game.CASINO_POLE_UNTIL or {}  -- room_idx -> turn its switch animation ends
 
 
 function CasinoLog(msg)
@@ -312,8 +356,8 @@ local CASINO_NO_INTERRUPT = {
     CreatureCastingPreparation = true, CreatureUnconscious = true,
     InPowerHand = true, Torturing = true,
     CreatureInPrison = true, CreatureArrivedAtPrison = true,
-    CreatureInCombat = false, CreatureCombatFlee = true,
-    CreatureDoorCombat = false, CreatureObjectCombat = true,
+    CreatureInCombat = true, CreatureCombatFlee = true,
+    CreatureDoorCombat = true, CreatureObjectCombat = true,
 }
 
 function CasinoCanInterrupt(cr)
@@ -391,9 +435,15 @@ function CasinoRoomAt(stl_x, stl_y)
     return slab.room
 end
 
--- Slabs divided by two, the same rule the engine uses for its worker rooms.
+-- CASINO_SEATS_PER_TABLE creatures per roulette table in the room.
 function CasinoCapacity(room)
-    local n = math.floor(#room.slabs / 2)
+    local tables = #CasinoTables(room)
+    if tables > 0 then
+        return tables * CASINO_SEATS_PER_TABLE
+    end
+    -- A room too small to have inner slabs has no table: slabs divided by two,
+    -- the rule the engine uses for its own worker rooms.
+    local n = math.floor(room.slabs_count / 2)
     if n < 1 then n = 1 end
     return n
 end
@@ -537,8 +587,10 @@ function Casino_Walk_Process(cr)
         -- Clear GOING before the state change: the engine skips CleanupFunction
         -- for a self-change made from inside a ProcessFunction.
         Game.CASINO_GOING[idx] = nil
-        CasinoSeat(cr, room)
+        local seat = CasinoSeat(cr, room)
         CasinoLog("seated " .. cr.model .. " #" .. idx .. " in room " .. room.room_idx)
+        -- Arrived somewhere in the room; now on to a table.
+        CasinoNextSpot(cr, room, seat)
     end
     return 0
 end
@@ -560,13 +612,14 @@ function Casino_Play_Process(cr)
         cr.state = "CreatureDoingNothing"
         return 0
     end
+    local turn = PLAYER0.GAME_TURN
     if seat.moving then
         -- Arrived at the new spot. Movement is over, so a facing set now sticks,
         -- and the countdown to the next round only starts once settled - walking
         -- must not eat into it.
         seat.moving = nil
-        cr.orientation = math.random(0, 2047)
-        seat.next_round = PLAYER0.GAME_TURN + CASINO_ROUND_TICKS
+        CasinoFaceTable(cr, seat)
+        seat.next_round = turn + CASINO_ROUND_TICKS
     end
 
     -- Buy-in happens the moment the creature is settled and its first timer
@@ -579,7 +632,16 @@ function Casino_Play_Process(cr)
         end
     end
 
-    if PLAYER0.GAME_TURN >= seat.next_round then
+    if seat.spin_until then
+        -- Bet is placed, the wheel is turning.
+        if turn >= seat.spin_until then
+            seat.spin_until = nil
+            CasinoStopTable(seat.table)
+            CasinoFinishRound(cr, seat)
+        else
+            CasinoHop(cr, seat, turn)
+        end
+    elseif turn >= seat.next_round then
         CasinoRound(cr, seat)
     end
     return 0
@@ -651,26 +713,228 @@ function CasinoRound(cr, seat)
 
     -- Not while cheering or moaning: walking would replace the mood state on the
     -- spot. CasinoWatchdog sends the creature on once the mood is over.
+    -- Place the bet. At a table that means waiting for the wheel to stop;
+    -- without one the game is settled on the spot.
+    local stop, joined = CasinoSpinTable(seat.table)
+    if stop == nil then
+        if CasinoResolveBet(cr, seat, room) and not seat.emote_until then
+            CasinoNextSpot(cr, room, seat)
+        end
+    elseif joined then
+        seat.spin_until = stop
+        CasinoFaceTable(cr, seat)
+    else
+        -- The wheel is about to stop on someone else's game: bet on the next spin.
+        seat.next_round = stop + 1
+    end
+end
+
+-- The wheel has stopped: now the creature learns how its bet went.
+function CasinoFinishRound(cr, seat)
+    local room = CasinoRoomAt(cr.pos.stl_x, cr.pos.stl_y)
+    if not room or not CasinoRoomIsRun(room) then
+        CasinoSendAway(cr, 0)
+        return
+    end
+    seat.room_idx = room.room_idx
+    seat.next_round = PLAYER0.GAME_TURN + CASINO_ROUND_TICKS
     if CasinoResolveBet(cr, seat, room) and not seat.emote_until then
         CasinoNextSpot(cr, room, seat)
     end
 end
 
--- Drift to another spot between rounds and take a fresh facing once there, so a
--- busy casino looks like a gambling hall rather than a row of statues. The turn
--- has to wait until the walk is done, otherwise the movement overwrites the angle
--- again - Casino_Play_Process does it on arrival.
-function CasinoNextSpot(cr, room, seat)
-    local x, y = CasinoRandomSpot(room)
+-- =====================================================================
+--  ROULETTE TABLES
+-- =====================================================================
+-- The tables are decoration the room's slab graphics put on its inner slabs
+-- (UpdateFunctionTABLE in init.lua thins them out to a checkerboard). Creatures
+-- play at them: they walk up to a free subtile next to a table, face it, bet -
+-- which sets the wheel spinning - hop about while it turns, and only learn how
+-- the bet went once it stops.
+
+-- Tables per room. Kept outside Game on purpose: it rebuilds itself after a
+-- load, whenever the room changes size, and on every deep sweep.
+CASINO_TABLE_CACHE = {}
+
+function CasinoTables(room)
+    local c = CASINO_TABLE_CACHE[room.room_idx]
+    local n = room.slabs_count
+    local turn = PLAYER0.GAME_TURN
+    -- Also rebuilt once it is a second old: the engine may ask for the capacity
+    -- while it is still placing the slab graphics, before the tables exist.
+    if not c or c.slabs ~= n or turn - c.turn > CASINO_TICK then
+        local list = {}
+        for _, slab in ipairs(room.slabs) do
+            ---@diagnostic disable-next-line: param-type-mismatch
+            local things = GetThingsOnSlab(slab.slb_x, slab.slb_y, "OBJECT")
+            if things then
+                for _, ob in ipairs(things) do
+                    if ob:isValid() and ob.model == CASINO_TABLE_MODEL then
+                        list[#list + 1] = ob.ThingIndex
+                    end
+                end
+            end
+        end
+        local changed = not c or #c.list ~= #list
+        c = { slabs = n, list = list, turn = turn }
+        CASINO_TABLE_CACHE[room.room_idx] = c
+        -- The room's own capacity is only recomputed by the engine when the room
+        -- changes; tables appear and disappear on their own, so pass it on.
+        if changed then
+            Casino_Total_Capacity(room)
+        end
+    end
+    return c.list
+end
+
+-- The table behind an index, or nil once it is gone or the index was recycled.
+function CasinoTable(tidx)
+    if not tidx then return nil end
+    local t = GetThingByIdx(tidx)
+    if t and t:isValid() and t.model == CASINO_TABLE_MODEL then return t end
+    return nil
+end
+
+-- Turns the creature towards a point. Angles: 0 north, 512 east, 1024 south,
+-- 1536 west, 2048 for the full circle.
+function CasinoFace(cr, val_x, val_y)
+    local p = cr.pos
+    local dx, dy = val_x - p.val_x, val_y - p.val_y
+    if dx == 0 and dy == 0 then return end
+    -- math.atan2 in LuaJIT; Lua 5.3+ merged it into math.atan(y, x).
+    local atan2 = math.atan2 or math.atan
+    cr.orientation = math.floor(atan2(dx, -dy) * 1024 / math.pi + 0.5) % 2048
+end
+
+function CasinoFaceTable(cr, seat)
+    local t = CasinoTable(seat.table)
+    if t then
+        local p = t.pos
+        CasinoFace(cr, p.val_x, p.val_y)
+    else
+        -- No table: a random way, so a crowd does not all stare the same direction.
+        cr.orientation = math.random(0, 2047)
+    end
+end
+
+function CasinoShuffle(t)
+    for i = #t, 2, -1 do
+        local j = math.random(i)
+        t[i], t[j] = t[j], t[i]
+    end
+    return t
+end
+
+local CASINO_AROUND = { {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {1,0}, {-1,1}, {0,1}, {1,1} }
+
+-- A free subtile right next to a table of this room: one of the eight around the
+-- table's own subtile that nobody else seated has as their spot. Tables and
+-- spots are tried in random order. Returns stl_x, stl_y and the table, or nil.
+function CasinoTableSpot(room, idx)
+    local taken = {}
+    for other, s in pairs(Game.CASINO_SEAT) do
+        if other ~= idx and s.stl_x then
+            taken[s.stl_x * 1024 + s.stl_y] = true
+        end
+    end
+    local tables = {}
+    for i, tidx in ipairs(CasinoTables(room)) do tables[i] = tidx end
+    for _, tidx in ipairs(CasinoShuffle(tables)) do
+        local t = CasinoTable(tidx)
+        local p = t and t.pos
+        local here = p and CasinoRoomAt(p.stl_x, p.stl_y)
+        if here and here.room_idx == room.room_idx then
+            local around = {}
+            for i, d in ipairs(CASINO_AROUND) do around[i] = d end
+            for _, d in ipairs(CasinoShuffle(around)) do
+                local x, y = p.stl_x + d[1], p.stl_y + d[2]
+                if not taken[x * 1024 + y] then return x, y, tidx end
+            end
+        end
+    end
+    return nil
+end
+
+function CasinoWalkToSpot(cr, seat, x, y)
     -- Set before walk_to: should the state change fire Casino_Play_Cleanup, this
     -- is what tells it the creature is relocating, not leaving the table.
     seat.moving = true
     if cr:walk_to(x, y) then
         cr.continue_state = "CasinoGambling"
-    else
-        seat.moving = nil
-        cr.orientation = math.random(0, 2047)
+        seat.stl_x, seat.stl_y = x, y
+        return true
     end
+    seat.moving = nil
+    return false
+end
+
+-- Where the next game is played. Mostly at the same table, sometimes another one
+-- (CASINO_SWITCH_TABLE), so a busy casino does not look frozen. A room with no
+-- table at all - too small to have inner slabs - plays on a random spot instead.
+function CasinoNextSpot(cr, room, seat)
+    if CasinoTable(seat.table) and math.random(100) > CASINO_SWITCH_TABLE then
+        local p = cr.pos
+        if p.stl_x == seat.stl_x and p.stl_y == seat.stl_y then
+            CasinoFaceTable(cr, seat)
+            seat.next_round = PLAYER0.GAME_TURN + CASINO_ROUND_TICKS
+            return
+        end
+        if CasinoWalkToSpot(cr, seat, seat.stl_x, seat.stl_y) then return end
+    end
+    for _ = 1, CASINO_WALK_ATTEMPTS do
+        local x, y, tidx = CasinoTableSpot(room, cr.ThingIndex)
+        if not x then break end
+        seat.table = tidx
+        if CasinoWalkToSpot(cr, seat, x, y) then return end
+    end
+    seat.table, seat.stl_x, seat.stl_y = nil, nil, nil
+    local x, y = CasinoRandomSpot(room)
+    if not CasinoWalkToSpot(cr, seat, x, y) then
+        cr.orientation = math.random(0, 2047)
+        seat.next_round = PLAYER0.GAME_TURN + CASINO_ROUND_TICKS
+    end
+end
+
+-- Sets a table's wheel spinning, or lets a creature join a spin already under
+-- way - but only during its first half, so nobody bets on a wheel that is about
+-- to stop. Returns the turn the wheel stops and whether the bet made it in; nil
+-- when there is no table.
+function CasinoSpinTable(tidx)
+    local t = CasinoTable(tidx)
+    if not t then return nil end
+    local turn = PLAYER0.GAME_TURN
+    local stop = Game.CASINO_SPIN[tidx]
+    if stop and stop > turn then
+        return stop, (stop - turn) >= CASINO_SPIN_TICKS / 2
+    end
+    stop = turn + CASINO_SPIN_TICKS
+    Game.CASINO_SPIN[tidx] = stop
+    t.anim_speed = CASINO_SPIN_SPEED
+    return stop, true
+end
+
+-- Stops the wheel once its time is up. Every player at the table calls this when
+-- its own game ends; a spin that was restarted in the meantime is left running.
+function CasinoStopTable(tidx)
+    if not tidx then return end
+    local stop = Game.CASINO_SPIN[tidx]
+    if stop and PLAYER0.GAME_TURN < stop then return end
+    Game.CASINO_SPIN[tidx] = nil
+    local t = CasinoTable(tidx)
+    if t then t.anim_speed = 0 end
+end
+
+-- An occasional hop while the wheel turns, the way creatures hop while they wait
+-- to join a fight. set_velocity is all Lua has, and it always pushes sideways by
+-- the full amount as well (angles_to_vector), so two pushes in opposite
+-- directions cancel the sideways part and add up upwards. 512 points straight up.
+function CasinoHop(cr, seat, turn)
+    if turn < (seat.hop_at or 0) then return end
+    if math.random(100) > CASINO_HOP_CHANCE then return end
+    local half = math.floor(math.random(CASINO_HOP_MIN, CASINO_HOP_MAX) / 2)
+    cr:set_velocity(half, 0, 512)
+    cr:set_velocity(half, 1024, 512)
+    seat.hop_at = turn + CASINO_HOP_GAP
 end
 
 -- Plays out one bet. Returns whether the creature stays at the table.
@@ -790,44 +1054,160 @@ end
 -- =====================================================================
 --  MODE BOXES
 -- =====================================================================
--- The two boxes behave as a single lever in the middle of the room: only the box
--- that switches to the OTHER mode is ever visible, so what you see is what
--- clicking it will do. The engine destroys a special box on click, so the lever
--- is simply re-placed on the next tick.
+-- The two boxes behave as a single lever in the middle of the room's top row:
+-- only the box that switches to the OTHER mode is ever visible, so what you see
+-- is what clicking it will do. The engine destroys a special box on click, so
+-- the lever is simply re-placed on the next tick.
 function CasinoIsLever(ob)
     local m = ob.model
     return m == CASINO_LEVER_MODEL[CASINO_BOX_HAPPY]
         or m == CASINO_LEVER_MODEL[CASINO_BOX_PROFIT]
 end
 
+-- Where the lever belongs: the topmost row of the room's slabs, centred on that
+-- row. With an even number of slabs in the row the middle is the border between
+-- the two middle slabs, so the lever stands exactly there rather than favouring
+-- one side. If the row has gaps (an odd-shaped room) and the middle falls into
+-- one, the nearest slab of the row is used instead.
+-- Returns map coordinates (val), not subtiles, so that border position works.
+function CasinoLeverSpot(room)
+    local top, row = nil, {}
+    for _, slab in ipairs(room.slabs) do
+        if top == nil or slab.slb_y < top then
+            top, row = slab.slb_y, {}
+        end
+        if slab.slb_y == top then row[slab.slb_x] = true end
+    end
+    if top == nil then
+        local c = room.centerpos
+        return c.val_x, c.val_y
+    end
+
+    local lo, hi
+    for x in pairs(row) do
+        if lo == nil or x < lo then lo = x end
+        if hi == nil or x > hi then hi = x end
+    end
+    local mid = (lo + hi) / 2
+    local fits = row[mid] or (row[math.floor(mid)] and row[math.ceil(mid)])
+    if not fits then
+        local best
+        for x in pairs(row) do
+            if best == nil or math.abs(x - mid) < math.abs(best - mid)
+               or (math.abs(x - mid) == math.abs(best - mid) and x < best) then
+                best = x
+            end
+        end
+        mid = best
+    end
+    -- 768 per slab; the +384 puts the point in the middle of the slab.
+    return math.floor(mid * 768 + 384), top * 768 + 384
+end
+
+-- The lever is placed at an exact map position, so "in place" allows for a
+-- little rounding but not for being knocked onto a neighbouring subtile.
+function CasinoLeverAt(ob, val_x, val_y)
+    local p = ob.pos
+    return math.abs(p.val_x - val_x) <= 16 and math.abs(p.val_y - val_y) <= 16
+end
+
+function CasinoIsPole(ob)
+    return CASINO_POLE_MODELS[ob.model] == true
+end
+
+-- The special boxes and the pole decorations in a room, in one pass.
 function CasinoBoxesInRoom(room)
-    local out = {}
+    local out, poles = {}, {}
     for _, slab in ipairs(room.slabs) do
         ---@diagnostic disable-next-line: param-type-mismatch
         local things = GetThingsOnSlab(slab.slb_x, slab.slb_y, "OBJECT")
         if things then
             for _, ob in ipairs(things) do
-                if ob:isValid() and CasinoIsLever(ob) then
-                    out[#out + 1] = ob
+                if ob:isValid() then
+                    if CasinoIsLever(ob) then
+                        out[#out + 1] = ob
+                    elseif CasinoIsPole(ob) then
+                        poles[#poles + 1] = ob
+                    end
                 end
             end
         end
     end
-    return out
+    return out, poles
+end
+
+function CasinoPlaceAt(model, room, val_x, val_y)
+    local ob = AddObjectToLevelAtPos(model, math.floor(val_x / 256), math.floor(val_y / 256), 0, room.owner)
+    if not ob then return nil end
+    ob.pos = { val_x = val_x, val_y = val_y, val_z = ob.pos.val_z }
+    Game.CASINO_LEVERS[ob.ThingIndex] = true
+    return ob
+end
+
+-- Exactly one idle pole on the lever's spot, showing the room's mode. Poles
+-- placed by hand in the map editor are taken over: the first one is moved onto
+-- the spot, any others go. Left alone while a switch animation is playing.
+function CasinoEnsurePole(room, poles, val_x, val_y)
+    if (Game.CASINO_POLE_UNTIL[room.room_idx] or 0) > PLAYER0.GAME_TURN then return end
+    local keep = nil
+    for _, ob in ipairs(poles) do
+        if (not keep) and ob.model == CASINO_POLE_IDLE then
+            keep = ob
+        else
+            ob:delete()
+        end
+    end
+    if not keep then
+        keep = CasinoPlaceAt(CASINO_POLE_IDLE, room, val_x, val_y)
+        if not keep then return end
+    elseif not CasinoLeverAt(keep, val_x, val_y) then
+        keep.pos = { val_x = val_x, val_y = val_y, val_z = keep.pos.val_z }
+    end
+    Game.CASINO_LEVERS[keep.ThingIndex] = true
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    keep.anim_sprite = CASINO_POLE_LOOK[CasinoMode(room.room_idx)].sprite
+end
+
+-- The lever was flipped: swap the idle pole for the matching switch animation,
+-- and have the idle pole take over again once it has played.
+function CasinoFlipPole(room)
+    local idx = room.room_idx
+    local val_x, val_y = CasinoLeverSpot(room)
+    local _, poles = CasinoBoxesInRoom(room)
+    for _, ob in ipairs(poles) do ob:delete() end
+    if not CasinoPlaceAt(CASINO_POLE_LOOK[CasinoMode(idx)].switch, room, val_x, val_y) then return end
+    Game.CASINO_POLE_UNTIL[idx] = PLAYER0.GAME_TURN + CASINO_POLE_SWITCH_TICKS
+    local trig = RegisterTimerEvent("CasinoPoleSettle", CASINO_POLE_SWITCH_TICKS, false)
+    trig.triggerData.room_idx = idx
+end
+
+function CasinoPoleSettle(eventData, triggerData)
+    local idx = triggerData.room_idx
+    -- Flipped again in the meantime: that newer timer settles it.
+    if (Game.CASINO_POLE_UNTIL[idx] or 0) > PLAYER0.GAME_TURN then return end
+    Game.CASINO_POLE_UNTIL[idx] = nil
+    for _, room in ipairs(CasinoRooms()) do
+        if room.room_idx == idx then
+            local val_x, val_y = CasinoLeverSpot(room)
+            local _, poles = CasinoBoxesInRoom(room)
+            CasinoEnsurePole(room, poles, val_x, val_y)
+            return
+        end
+    end
 end
 
 -- Fast path for the overwhelmingly common case: the right lever is already
--- sitting in the middle and nothing needs doing. That costs one GetThingsOnSlab
+-- sitting in its spot and nothing needs doing. That costs one GetThingsOnSlab
 -- instead of one per slab of the room, which for a large casino is the
 -- difference between one call a second and twenty.
 function CasinoLeverIsInPlace(room, want)
-    local center = room.centerpos
+    local val_x, val_y = CasinoLeverSpot(room)
     ---@diagnostic disable-next-line: param-type-mismatch
-    local things = GetThingsOnSlab(center.slb_x, center.slb_y, "OBJECT")
+    local things = GetThingsOnSlab(math.floor(val_x / 768), math.floor(val_y / 768), "OBJECT")
     if not things then return false end
     for _, ob in ipairs(things) do
         if ob:isValid() and ob.model == CASINO_LEVER_MODEL[want]
-           and ob.pos.stl_x == center.stl_x and ob.pos.stl_y == center.stl_y then
+           and CasinoLeverAt(ob, val_x, val_y) then
             Game.CASINO_LEVERS[ob.ThingIndex] = true
             return true
         end
@@ -846,7 +1226,8 @@ function CasinoEnsureLever(room, deep)
     -- Keep the first correct lever, remove everything else, so a mode switch or
     -- a stray duplicate always collapses back to exactly one lever.
     local keep = nil
-    for _, ob in ipairs(CasinoBoxesInRoom(room)) do
+    local boxes, poles = CasinoBoxesInRoom(room)
+    for _, ob in ipairs(boxes) do
         if (not keep) and ob.model == CASINO_LEVER_MODEL[want] then
             keep = ob
         else
@@ -854,22 +1235,44 @@ function CasinoEnsureLever(room, deep)
         end
     end
 
-    local center = room.centerpos
+    local val_x, val_y = CasinoLeverSpot(room)
     if not keep then
-        local ob = AddObjectToLevelAtPos(CASINO_LEVER_MODEL[want],
-            center.stl_x, center.stl_y, want, room.owner)
-        if ob then
-            Game.CASINO_LEVERS[ob.ThingIndex] = true
-        end
-        return
+        keep = AddObjectToLevelAtPos(CASINO_LEVER_MODEL[want],
+            math.floor(val_x / 256), math.floor(val_y / 256), want, room.owner)
+        if not keep then return end
+        Game.CASINO_LEVERS[keep.ThingIndex] = true
+        CasinoLog("room " .. room.room_idx .. " (" .. CasinoMode(room.room_idx)
+            .. ") lever placed: " .. CASINO_LEVER_MODEL[want])
     end
 
-    -- Drag it back to the middle whenever it is off. Mostly this happens because
-    -- the room grew or shrank and moved its own centre, not because the lever
-    -- went anywhere. Assign the whole position table: thing.pos hands out a fresh
-    -- table on every read, so writing keep.pos.stl_x would be thrown away.
-    if keep.pos.stl_x ~= center.stl_x or keep.pos.stl_y ~= center.stl_y then
-        keep.pos = center
+    -- Put it exactly on its spot. A new lever needs this because it was spawned
+    -- on a subtile centre, an old one whenever the room was built on or sold off
+    -- and its top row moved. Assign the whole position table: thing.pos hands out
+    -- a fresh table on every read, so writing keep.pos.val_x would be thrown away.
+    if not CasinoLeverAt(keep, val_x, val_y) then
+        keep.pos = { val_x = val_x, val_y = val_y, val_z = keep.pos.val_z }
+    end
+    CasinoClearLeverSpot(val_x, val_y)
+    CasinoEnsurePole(room, poles, val_x, val_y)
+end
+
+-- The lever takes the place of the decoration the room's slab graphics put on
+-- its slab: the barrel of the top row's middle slab, or with an even number of
+-- slabs the barrels of the two slabs it stands between. The slab graphics may put
+-- them back when the room is rebuilt around them, which the deep sweep catches.
+function CasinoClearLeverSpot(val_x, val_y)
+    local slb_y = math.floor(val_y / 768)
+    for slb_x = math.floor((val_x - 384) / 768), math.floor((val_x + 383) / 768) do
+        ---@diagnostic disable-next-line: param-type-mismatch
+        local things = GetThingsOnSlab(slb_x, slb_y, "OBJECT")
+        if things then
+            for _, ob in ipairs(things) do
+                if ob:isValid() and CASINO_LEVER_REPLACES[ob.model] then
+                    ob:delete()
+                    CASINO_TABLE_CACHE = {}
+                end
+            end
+        end
     end
 end
 
@@ -894,7 +1297,7 @@ end
 function CasinoRemoveStrayLevers()
     for idx in pairs(Game.CASINO_LEVERS) do
         local ob = GetThingByIdx(idx)
-        if (not ob) or (not ob:isValid()) or (not CasinoIsLever(ob)) then
+        if (not ob) or (not ob:isValid()) or not (CasinoIsLever(ob) or CasinoIsPole(ob)) then
             -- Gone, or the index got recycled for something else.
             Game.CASINO_LEVERS[idx] = nil
         elseif not CasinoRoomAt(ob.pos.stl_x, ob.pos.stl_y) then
@@ -917,6 +1320,9 @@ function CasinoDeepSweep()
             else
                 ob:delete()
             end
+        elseif ob:isValid() and CasinoIsPole(ob) and CasinoRoomAt(ob.pos.stl_x, ob.pos.stl_y) then
+            -- Poles outside a casino may be a mapper's decoration: left alone.
+            Game.CASINO_LEVERS[ob.ThingIndex] = true
         end
     end
 end
@@ -947,6 +1353,7 @@ function CasinoSetMode(eventData, mode)
     if not room then return end
     Game.CASINO_MODE[room.room_idx] = mode
     CasinoLog("room " .. room.room_idx .. " -> mode " .. mode)
+    CasinoFlipPole(room)
 end
 
 function CasinoBoxHappy(eventData)  CasinoSetMode(eventData, "HAPPY")  end
@@ -1008,7 +1415,13 @@ function CasinoWatchdog()
                     -- the way a round without an emote would have gone.
                     seat.emote_until = nil
                     cr.state = "CasinoGambling"
-                    CasinoNextSpot(cr, room, seat)
+                    if seat.spin_until then
+                        -- Danced through its own game (a jackpot at another
+                        -- table): stay put, the result comes once it resumes.
+                        CasinoFaceTable(cr, seat)
+                    else
+                        CasinoNextSpot(cr, room, seat)
+                    end
                 end
             end
         end
@@ -1027,48 +1440,46 @@ function CasinoWatchdog()
     end
 end
 
--- The engine has no drop event, so a creature is flagged while it sits in the
--- hand and the landing is resolved here on the next tick. Reacting to mere
--- presence instead would also punish creatures that just walk through the room.
-function CasinoOnPickUp(eventData)
-    local cr = eventData.thing   -- Builtins.lua spells this lowercase
-    if not cr or not cr:isValid() then return end
+-- A creature the keeper dropped has landed, and the engine has already decided
+-- what it does there. On landing the engine looks for a fight first - an enemy
+-- creature, a heart, or an enemy door on one of the four neighbouring slabs -
+-- and only then for a job. A creature it put into a fight is left to it:
+-- CasinoCanInterrupt refuses every combat state. The rest, if it landed in a
+-- casino, gets a seat.
+function CasinoTakeDroppedCreature(cr)
     if not CasinoIsPlayable(cr) then return end
-    Game.CASINO_HELD[cr.ThingIndex] = true
+    local room = CasinoRoomAt(cr.pos.stl_x, cr.pos.stl_y)
+    if not room or not CasinoRoomIsRun(room) then return end
+    if not CasinoCanInterrupt(cr) then return end
+
+    local idx = cr.ThingIndex
+    if CasinoAttitude(cr) == "HATE" then
+        CasinoSpangle(cr, "EFFECT_SPANGLE_RED")
+        CasinoSendAway(cr, CASINO_HATE_ANNOY)
+        CasinoEmote(cr, "SAD")
+    elseif CasinoHasSettledIn(cr) and not CasinoIsFurious(cr)
+           and CasinoHouseIsOpen(room.owner)
+           and not CasinoHouseIsBroke(room.owner)
+           and CasinoHasFreeSeat(room) then
+        -- A deliberate drop bypasses the leave cooldown, but nothing
+        -- else: no bed, too angry, or a house that cannot pay all mean
+        -- the creature is left alone and wanders back out. Checking it
+        -- here rather than at the first round saves it walking to a
+        -- table only to storm off again six seconds later.
+        Game.CASINO_COOLDOWN[idx] = nil
+        -- Walk off to pick a spot first instead of gambling on the
+        -- tile they happened to land on. Creatures that come by
+        -- themselves already arrive at a chosen spot.
+        CasinoNextSpot(cr, room, CasinoSeat(cr, room))
+    end
 end
 
-function CasinoResolveDrops()
-    for idx in pairs(Game.CASINO_HELD) do
-        local cr = GetThingByIdx(idx)
-        ---@cast cr Creature
-        if (not cr) or (not cr:isValid()) then
-            Game.CASINO_HELD[idx] = nil
-        elseif not cr.picked_up then
-            Game.CASINO_HELD[idx] = nil
-            local room = CasinoRoomAt(cr.pos.stl_x, cr.pos.stl_y)
-            if room and CasinoRoomIsRun(room) then
-                if CasinoAttitude(cr) == "HATE" then
-                    CasinoSpangle(cr, "EFFECT_SPANGLE_RED")
-                    CasinoSendAway(cr, CASINO_HATE_ANNOY)
-                    CasinoEmote(cr, "SAD")
-                elseif CasinoHasSettledIn(cr) and not CasinoIsFurious(cr)
-                       and CasinoHouseIsOpen(room.owner)
-                       and not CasinoHouseIsBroke(room.owner)
-                       and CasinoHasFreeSeat(room) then
-                    -- A deliberate drop bypasses the leave cooldown, but nothing
-                    -- else: no bed, too angry, or a house that cannot pay all mean
-                    -- the creature is left alone and wanders back out. Checking it
-                    -- here rather than at the first round saves it walking to a
-                    -- table only to storm off again six seconds later.
-                    Game.CASINO_COOLDOWN[idx] = nil
-                    -- Walk off to pick a spot first instead of gambling on the
-                    -- tile they happened to land on. Creatures that come by
-                    -- themselves already arrive at a chosen spot.
-                    CasinoNextSpot(cr, room, CasinoSeat(cr, room))
-                end
-            end
-        end
-    end
+-- CreatureLanded fires right after the engine's own drop logic, in the same
+-- turn, so whatever is set here replaces what the engine chose.
+function CasinoOnLanded(eventData)
+    local cr = eventData.unit
+    if not cr or not cr:isValid() then return end
+    CasinoTakeDroppedCreature(cr)
 end
 
 -- Emulated job-preference rank. The engine's own chain (assigned job -> primary
@@ -1205,10 +1616,15 @@ function CasinoTick()
     if deep then CasinoDeepSweep() end
     CasinoEnsureBoxes(deep)
 
-    -- These two must stay on every tick: the watchdog frees stuck seats and the
-    -- drop handler has to react while the creature is still where you put it.
+    -- Every tick: the watchdog frees seats whose creature has gone elsewhere.
     CasinoWatchdog()
-    CasinoResolveDrops()
+
+    -- Wheels whose players all left before the game ended.
+    local turn = PLAYER0.GAME_TURN
+    for tidx, stop in pairs(Game.CASINO_SPIN) do
+        if turn >= stop then CasinoStopTable(tidx) end
+    end
+    if deep then CASINO_TABLE_CACHE = {} end
 
     -- Seats change without the engine noticing, so report them once per tick.
     for _, room in ipairs(CasinoRooms()) do
@@ -1257,9 +1673,8 @@ function CasinoInit()
     RegisterTimerEvent("CasinoTick", CASINO_TICK, true)
     RegisterSpecialActivatedEvent("CasinoBoxHappy",  CASINO_BOX_HAPPY)
     RegisterSpecialActivatedEvent("CasinoBoxProfit", CASINO_BOX_PROFIT)
-    -- Registered unfiltered on purpose: RegisterPickUpEvent's optional filters
-    -- compare eventData.Thing, but Builtins.lua fills in eventData.thing.
-    RegisterPickUpEvent("CasinoOnPickUp")
+    -- Needs a game build with the CreatureLanded event (KeeperFX PR #5584).
+    RegisterCreatureLandedEvent("CasinoOnLanded")
 
     local trig = CreateTrigger("ChatMsg", "CasinoChatStatus", {})
     TriggerAddCondition(trig, function(eventData)
