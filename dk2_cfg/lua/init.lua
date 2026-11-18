@@ -132,3 +132,19 @@ function CheckForRemovalTable(Casino_Table)
     -- Checkerboard pattern
     return (Casino_Table.pos.slb_x + Casino_Table.pos.slb_y) % 2 == 0
 end
+
+-- randomise Appearance of Barricade
+
+Game.Hero_TrapsToInit = {}
+
+function UpdateFunctionHEROTRAP(BARRICADE)
+    if BARRICADE.creation_turn == PLAYER0.GAME_TURN - 1 then
+        -- -1 tells the engine the table was deleted, so it stops processing it
+        return InitializeH_Trap(BARRICADE)
+    end
+    return 0
+end
+
+function InitializeH_Trap(BARRICADE)
+    BARRICADE.anim_sprite = ("BARRICADE_HERO_" .. math.random(1,4))
+end
