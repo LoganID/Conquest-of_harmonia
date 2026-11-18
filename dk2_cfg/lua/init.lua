@@ -41,7 +41,7 @@ end
 function BridgeAi(eventData, triggerData)
     
     local slab = triggerData.Slab
-    if slab.owner ~= PLAYER0 then
+    if slab.owner ~= PLAYER0 and slab.owner ~= PLAYER_GOOD then
     ChangeSlabType(slab.slb_x, slab.slb_y, "BRIDGE_STONE")
     end
 end
@@ -142,7 +142,7 @@ function UpdateFunctionHEROTRAP(BARRICADE)
         -- -1 tells the engine the table was deleted, so it stops processing it
         return InitializeH_Trap(BARRICADE)
     end
-    return 0
+    return 1
 end
 
 function InitializeH_Trap(BARRICADE)
