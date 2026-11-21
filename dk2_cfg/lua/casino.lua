@@ -172,7 +172,8 @@ CASINO_ATTITUDE = {
     WARLOCK      = "HATE", VAMPIRE       = "HATE", THIEF        = "LIKE", SALAMANDER            = "LIKE",
     GOBLIN       = "LIKE", DARK_ELF      = "LIKE", FIREFLY     = "LIKE", BLACK_KNIGHT          = "LIKE", 
     DWARFA       = "LIKE", SAMURAI       = "LIKE", BARBARIAN    = "LIKE", MONK                  = "HATE", 
-    ARCHER       = "LIKE", WIZARD        = "LIKE", FAIRY        = "LIKE", GIANT                 = "LIKE", 
+    ARCHER       = "LIKE", WIZARD        = "LIKE", FAIRY        = "LIKE", GIANT                 = "LIKE",  
+    REAPER       = "LIKE",
 }
 
 -- A creature never carries more than its model's GoldHold out of the casino.
@@ -232,7 +233,7 @@ CASINO_IDLE_TURNS = 60    -- ~3s of continuous idling before the casino tempts t
 -- This is the proper fix for that; CASINO_START_DELAY only ever papered over it
 -- for the creatures already present at map start.
 -- models with LairSize 0 in creatrs/*.cfg never get a lair, so they never gamble
-CASINO_REQUIRE_LAIR = true
+CASINO_REQUIRE_LAIR = false
 
 -- Idle states. A creature sitting in one of these has already been run through
 -- the engine's whole job chain (assigned -> primary -> secondary) without a hit.

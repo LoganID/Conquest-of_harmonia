@@ -9,9 +9,6 @@ function OnGameStart()
     MyHeroParties()
     SpawnGuards()
     SpawnPatrols()
-    RegisterTimerEvent(StartPatrol2, 40, false)
-    RegisterTimerEvent(StartPatrol3, 120, false)
-    RegisterTimerEvent(StartPatrol4, 200, false)
 end
 
 -- Define the hero parties that can be spawned

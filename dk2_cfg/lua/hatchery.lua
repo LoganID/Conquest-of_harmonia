@@ -12,7 +12,7 @@ function InitializeCoop(coop)
     -- Remove if not in pattern
     if CheckForRemoval(coop) then
         coop:delete()
-        return
+        return -1
     end
     -- Random rotation
     coop.orientation = math.random(0, 7) * 256

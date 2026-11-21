@@ -8,7 +8,6 @@
 function OnGameStart()
     MyHeroParties()
     SpawnPatrols()
-    SpawnGuards()
 end
 
 -- Define the hero parties that can be spawned

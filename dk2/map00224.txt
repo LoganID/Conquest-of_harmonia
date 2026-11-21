@@ -37,6 +37,8 @@ SET_TIMER(PLAYER0, TIMER0)
 
 SET_TIMER(PLAYER0, TIMER1)
 
+REM DEAR OPUS, this map has 4 special gems that are needed to have the keepers working, the Reaper never spawns so it's just for this level and can stay like this
+
 IF(PLAYER0, TIMER1 >= 30)
 	PLAY_MESSAGE(PLAYER0,SPEECH,"lvl25spe01.ogg")
 	QUICK_OBJECTIVE(140,"This level is simple enough Keeper. Use your Salamander to destroy the invading enemy Imps. Kill them all and you shall be rewarded. Lose more than two of the four rooms under your control and you shall perish.")

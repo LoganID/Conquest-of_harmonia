@@ -60,7 +60,7 @@ function SpawnPatrols()
     -- Patrolling parties and individual heroes added to level.
     local PatrolPartyRed    =  AddPartyToLevel(PLAYER_GOOD       ,"DEFEND"                , -1)
     local PatrolPartyGreen  =  AddPartyToLevel(PLAYER_GOOD       ,"DEFEND2"              , 16)
-    local PatrolPartyYellow  =  AddPartyToLevel(PLAYER_GOOD       ,"DEFEND2"              , 17)
+    local PatrolPartyYellow  =  AddPartyToLevel(PLAYER_GOOD       ,"DEFEND3"              , 17)
 
     -- Calling Library function to activate patrols
     RegisterPatrol(PatrolPartyRed[1]    , northernroute , 1, "Red Patrol")
