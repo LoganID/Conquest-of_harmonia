@@ -4268,7 +4268,7 @@ SubtileZ = [1, 0]
 
 [thing353]
 ThingType = "Creature"
-SubtypeStringID = "DARK_MISTRESS"
+SubtypeStringID = "MISTRESS"
 Subtype = 20
 Ownership = 5
 Index = 30
