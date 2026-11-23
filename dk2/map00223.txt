@@ -1,0 +1,55 @@
+REM ********************************************
+REM
+REM             Script for Level 223
+REM
+REM ********************************************
+REM ********************************************
+REM
+REM             Script for Level 220
+REM
+REM ********************************************
+
+LEVEL_VERSION(1)
+
+SET_GENERATE_SPEED(400)
+BONUS_LEVEL_TIME(10000)
+
+START_MONEY(ALL_PLAYERS,30000)
+
+COMPUTER_PLAYER(PLAYER1,0)
+
+MAGIC_AVAILABLE(ALL_PLAYERS,POWER_HAND,1,1)
+MAGIC_AVAILABLE(ALL_PLAYERS,POWER_SLAP,1,1)
+MAGIC_AVAILABLE(ALL_PLAYERS,POWER_LIGHTNING,1,1)
+
+RUN_AFTER_VICTORY(1)
+
+SET_TIMER(PLAYER0, TIMER0)
+
+SET_TIMER(PLAYER0, TIMER1)
+
+IF(PLAYER0, TIMER1 >= 30)
+	PLAY_MESSAGE(PLAYER0,SPEECH,"lvl24spe01.ogg")
+	QUICK_OBJECTIVE(140,"I have provided you with pesky Dwarves for your entertainment, Keeper. Crush them like the irritating fleas they are. Guide the waiting boulders through the causeways and make Dwarf pizzas of them all. Be sure you complete the task before the time runs out.")
+ENDIF
+
+IF(PLAYER_GOOD, DWARFABONUS ==0)
+	WIN_GAME
+	PLAY_MESSAGE(PLAYER0,SPEECH,"lvl21spe02.ogg")
+	QUICK_OBJECTIVE(122,"Well done Keeper, you have completed your task.")
+	ZOOM_TO_LOCATION(PLAYER0,1)
+	ADD_CREATURE_TO_LEVEL(PLAYER0,MISTRESS,1,1,6,300)
+	ADD_CREATURE_TO_LEVEL(PLAYER0,BILE_DEMON,1,1,6,300)
+	ADD_CREATURE_TO_LEVEL(PLAYER0,SORCEROR,1,1,6,300)
+	ADD_CREATURE_TO_LEVEL(PLAYER0,SALAMANDER,1,1,6,300)
+	ADD_OBJECT_TO_LEVEL(SPECBOX_TRANSFR,2,1,PLAYER0)
+ENDIF
+
+IF(PLAYER0, MONEY <= 600)
+	DISPLAY_OBJECTIVE(140,PLAYER0)
+	LOSE_GAME
+ENDIF
+
+IF(PLAYER0, TIMER0 >= 10000)
+	LOSE_GAME
+ENDIF

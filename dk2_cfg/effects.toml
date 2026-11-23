@@ -1,0 +1,279 @@
+# KeeperFX Effects Configuration file
+# file version 15
+# Contains Effects, EffectGenerators and EffectElements
+
+[effect1]
+Name = "EFFECT_EXPLOSION_1"
+Health = 1
+GenerationType = 1
+GenerationAccelXYRange = [32,32]
+GenerationAccelZRange = [-32,32]
+GenerationKindRange = [1,1]
+AreaAffectType = 0
+HitType = 0
+Sound = 0
+AffectedByWind = 1
+LightRadius = 2
+LightIntensity = 45
+LightFlags = 1
+ElementsCount = 1
+AlwaysGenerate = 0
+
+[effect83]
+Name = "EFFECT_WORD_OF_POWER_NO_SOUND"
+Health = 10
+GenerationType = 1
+GenerationAccelXYRange = [100,100]
+GenerationAccelZRange = [1,1]
+GenerationKindRange = [10,10]
+AreaAffectType = 4
+HitType = 3
+SpellEffect = 0
+Sound = 0
+AffectedByWind = 1
+LightRadius = 10
+LightIntensity = 52
+LightFlags = 0
+ElementsCount = 20
+AlwaysGenerate = 0
+
+[effect84]
+Name = "EFFECT_EXPLOSION_CUSTOM"
+Health = 20
+GenerationType = 1
+GenerationAccelXYRange = [256,256]
+GenerationAccelZRange = [-256,256]
+GenerationKindRange = [1,1]
+AreaAffectType = 0
+HitType = 0
+SpellEffect = 0
+Sound = 0
+AffectedByWind = 1
+LightRadius = 10
+LightIntensity = 45
+LightFlags = 1
+ElementsCount = 10
+AlwaysGenerate = 0
+
+[effect85]
+Name = "EFFECT_SPAWN"
+Health = 5
+GenerationType = 1
+GenerationAccelXYRange = [50,120]
+GenerationAccelZRange = [-136,136]
+GenerationKindRange = [125,125]
+AreaAffectType = 0
+HitType = 0
+SpellEffect = 0
+Sound = 0
+AffectedByWind = 1
+LightRadius = 16
+LightIntensity = 16
+LightFlags = 0
+ElementsCount = 14
+AlwaysGenerate = 0
+
+[effect86]
+Name = "EFFECT_BRIDGEBURN"
+Health = 4
+GenerationType = 1
+GenerationAccelXYRange = [16,16]
+GenerationAccelZRange = [-32,64]
+GenerationKindRange = [106,106]
+AreaAffectType = 0
+HitType = 0
+SpellEffect = 0
+Sound = 948
+AffectedByWind = 1
+LightRadius = 0
+LightIntensity = 0
+LightFlags = 0
+ElementsCount = 3
+AlwaysGenerate = 0
+
+[effect87]
+Name = "EFFECT_COIN_DROP"
+Health = 3
+GenerationType = 1
+GenerationAccelXYRange = [64,64]
+GenerationAccelZRange = [-56,256]
+GenerationKindRange = [126,126]
+AreaAffectType = 0
+HitType = 0
+SpellEffect = 0
+Sound = 88
+AffectedByWind = 1
+LightRadius = 0
+LightIntensity = 0
+LightFlags = 0
+ElementsCount = 5
+AlwaysGenerate = 0
+
+[effect88]
+Name = "EFFECT_COIN_DROP_MINI"
+Health = 3
+GenerationType = 1
+GenerationAccelXYRange = [64,64]
+GenerationAccelZRange = [50,200]
+GenerationKindRange = [127,127]
+AreaAffectType = 0
+HitType = 0
+SpellEffect = 0
+Sound = 88
+AffectedByWind = 1
+LightRadius = 0
+LightIntensity = 0
+LightFlags = 0
+ElementsCount = 2
+AlwaysGenerate = 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[effectElement124]
+Name = "EFFECTELEMENT_CHICKENS"
+DrawClass = 2
+MoveType = 1
+Unanimated = 0
+Lifespan = [15,15]
+AnimationId = "CHICK_ROLL"
+SpriteSize = [226,256]
+AnimateOnce = 0
+SpriteSpeed = [256,256]
+AnimateOnFloor = false
+Unshaded = true
+Transparent = 0
+ThroughWalls = 0
+SizeChange = 0
+FallAcceleration = 8
+InertiaFloor = 102
+InertiaAir = 0
+SubeffectModel = 0
+SubeffectDelay = 0
+Movable = true
+Impacts = false
+TransformModel = 0
+LightRadius = 0
+LightIntensity = 0
+LightFlags = 0
+AffectedByWind = 1
+
+[effectElement125]
+Name = "EFFECTELEMENT_SPAWN"
+DrawClass = 2
+MoveType = 1
+Unanimated = 0
+Lifespan = [20,120]
+AnimationId = 823
+SpriteSize = [120,250]
+AnimateOnce = 0
+SpriteSpeed = [20,120]
+AnimateOnFloor = false
+Unshaded = false
+Transparent = 3
+ThroughWalls = 0
+SizeChange = 0
+FallAcceleration = 10
+InertiaFloor = 16
+InertiaAir = 0
+SubeffectModel = 32
+SubeffectDelay = 1
+Movable = true
+Impacts = true
+SolidGroundEffmodel = 0
+SolidGroundSoundId = 0
+SolidGroundLoudness = 256
+SolidGroundDestroyOnImpact = false
+WaterEffmodel = 19
+WaterSoundId = 36
+WaterLoudness = 80
+WaterDestroyOnImpact = true
+LavaEffmodel = 0
+LavaSoundId = 0
+LavaLoudness = 256
+LavaDestroyOnImpact = true
+TransformModel = 0
+LightRadius = 5
+LightIntensity = 52
+LightFlags = 0
+AffectedByWind = 1
+
+[effectElement126]
+Name = "EFFECTELEMENT_SPINNING_COINS"
+DrawClass = 2
+MoveType = 1
+Unanimated = 0
+Lifespan = [15,30]
+AnimationId = "SPINNING_COIN"
+SpriteSize = [200,300]
+AnimateOnce = 0
+SpriteSpeed = [50,200]
+AnimateOnFloor = true
+Unshaded = true
+Transparent = 0
+ThroughWalls = 0
+SizeChange = 0
+FallAcceleration = 8
+InertiaFloor = 102
+InertiaAir = 0
+SubeffectModel = 0
+SubeffectDelay = 0
+Movable = true
+Impacts = false
+TransformModel = 0
+LightRadius = 0
+LightIntensity = 0
+LightFlags = 0
+AffectedByWind = 1
+
+[effectElement127]
+Name = "EFFECTELEMENT_GOLD_COIN_BIGGER"
+DrawClass = 2
+MoveType = 1
+Unanimated = 0
+Lifespan = [10,30]
+AnimationId = 780
+SpriteSize = [250,350]
+AnimateOnce = 0
+SpriteSpeed = [192,256]
+AnimateOnFloor = false
+Unshaded = false
+Transparent = 0
+ThroughWalls = 0
+SizeChange = 0
+FallAcceleration = 20
+InertiaFloor = 102
+InertiaAir = 0
+SubeffectModel = 0
+SubeffectDelay = 0
+Movable = true
+Impacts = false
+SolidGroundEffmodel = 0
+SolidGroundSoundId = 0
+SolidGroundLoudness = 256
+SolidGroundDestroyOnImpact = true
+WaterEffmodel = 19
+WaterSoundId = 36
+WaterLoudness = 80
+WaterDestroyOnImpact = false
+LavaEffmodel = 0
+LavaSoundId = 0
+LavaLoudness = 256
+LavaDestroyOnImpact = true
+TransformModel = 0
+LightRadius = 0
+LightIntensity = 0
+LightFlags = 0
+AffectedByWind = 1
