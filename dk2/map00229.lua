@@ -158,7 +158,7 @@ function SpawnPatrols()
 	RegisterPatrol(PatrolPartySquad10[1], Route10, 1, "Squad10 Patrol")
 	RegisterPatrol(PatrolPartySquad11[1], Route11, 1, "Squad11 Patrol")
 	RegisterPatrol(PatrolPartySquad12[1], Route12, 1, "Squad12 Patrol")
-	RegisterGuard(Guard1[1], Pos13, 1500, "Guard 1", true, true, false)
-	RegisterGuard(Guard2[1], Pos14, 1500, "Guard 2", true, true, false)
+	RegisterGuard(Guard1[1], Pos13, 1500, "Guard 1", { fixed_spot = true, lock_facing = true, look_around = false })
+	RegisterGuard(Guard2[1], Pos14, 1500, "Guard 2", { fixed_spot = true, lock_facing = true, look_around = false })
 end
 
